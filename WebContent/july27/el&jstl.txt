@@ -1,0 +1,735 @@
+***EL관련예제***
+[eLEx1.jsp]
+<%@ page contentType="text/html;charset=euc-kr"%>
+
+<HTML>
+<HEAD>
+<TITLE>간단한 표현언어(EL)예제</TITLE>
+</HEAD>
+
+<BODY>
+
+<H3>간단한 표현언어(EL)예제</H3>
+<P>
+연산자를 사용한 예와 내장객체의 사용한 예:
+
+<TABLE BORDER="1">
+  <THEAD>
+    <TD><B>표현식</B></TD>
+    <TD><B>값</B></TD>
+  </THEAD>
+  <TR>
+    <TD>\${2 + 5}</TD>
+    <TD>${2 + 5}</TD>
+  </TD>
+  <TR>
+    <TD>\${4/5}</TD>
+    <TD>${4/5}</TD>
+  </TR>
+  <TR>
+    <TD>\${5 div 6}</TD>
+    <TD>${5 div 6}</TD>
+  </TR>
+  <TR>
+    <TD>\${5 mod 7}</TD>
+    <TD>${5 mod 7}</TD>
+  </TR>
+  <TR>
+    <TD>\${2 < 3}</TD>
+    <TD>${2 < 3}</TD>
+  </TR>
+  <TR>
+    <TD>\${2 gt 3}</TD>
+    <TD>${2 gt 3}</TD>
+  </TR>
+  <TR>
+    <TD>\${3.1 le 3.2}</TD>
+    <TD>${3.1 le 3.2}</TD>
+  </TR>
+  <TR>
+    <TD>\${(5 > 3) ? 5 : 3}</TD>
+    <TD>${(5 > 3) ? 5 : 3}</TD>
+  </TR>
+  <TR>
+    <TD>\${header.host.}</TD>
+    <TD>${header.host}</TD>
+  </TR>
+  <TR>
+    <TD>\${header["user-agent"]}</TD>	
+    <TD>${header["user-agent"]}</TD>
+  </TR>
+</TABLE>
+</BODY>
+</HTML>
+
+[eLEx2.jsp]
+<%@ page contentType="text/html;charset=euc-kr"%>
+<% request.setCharacterEncoding("euc-kr");%>
+
+<HTML>
+<HEAD>
+<TITLE>표현언어의 사용예제2</TITLE>
+</HEAD>
+
+<BODY>
+
+<H3>표현언어의 사용예제2 -파라미터값 처리</H3>
+<P>
+<FORM action="eLEx2.jsp" method="post">
+   이름 : <input type="text" name="name" value="${param.name}">
+          <input type="submit" value="확인">
+</FORM>
+
+<P>
+이름은: ${param.name} 입니다.
+
+</BODY>
+</HTML>
+
+[useELObject.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%
+    request.setAttribute("name", "최범균");
+%>
+<html>
+<head><title>EL Object</title></head>
+<body>
+
+요청 URI: ${pageContext.request.requestURI} <br>
+<%--
+	<%= pageContext.getRequest().getRequestURI()%>
+ --%>
+request의 name 속성: ${requestScope.name} <br>
+<%--
+	<%= request.getAttribute("name")%>
+ --%>
+code 파라미터: ${param.code}
+<%--
+	<%= request.getParameter("code")%>
+ --%>
+
+</body>
+</html>
+
+[DateUtil.java]
+package soldesk.el;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class DateUtil {
+	private static SimpleDateFormat formatter = new SimpleDateFormat(
+			"yyyy-MM-dd");
+
+	public static String format(Date date) {
+		return formatter.format(date);
+	}
+
+}
+
+[/WEB-INF/el-functions.tld]
+<?xml version="1.0" encoding="euc-kr" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+    	http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+	version="2.1">
+
+	<description>EL에서 함수실행</description>
+	<tlib-version>1.0</tlib-version>
+	<short-name>ELfunctions</short-name>
+	<uri>/ELFunctions</uri>
+
+	<function>
+		<description>Date 객체 포맷팅</description>
+		<name>dateFormat</name>
+		<function-class>soldesk.el.DateUtil</function-class>
+		<function-signature>
+			java.lang.String format(java.util.Date)
+		</function-signature>
+	</function>
+
+</taglib>
+
+[web.xml]
+<jsp-config>
+	<taglib>
+		<taglib-uri>
+			/WEB-INF/el-functions.tld
+	        </taglib-uri>
+		<taglib-location>
+			/WEB-INF/el-functions.tld
+	        </taglib-location>
+	</taglib>
+</jsp-config>
+
+[viewToday.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ page session="false" %>
+<%@ taglib prefix="elfunc" uri="/WEB-INF/el-functions.tld" %>
+<%
+	java.util.Date today = new java.util.Date();
+	request.setAttribute("today", today);
+%>
+<html>
+<head><title>EL 함수 호출</title></head>
+<body>
+
+오늘은 <b>${elfunc:dateFormat(today) }</b> 입니다.
+
+</body>
+</html>
+
+================================================
+
+***JSTL관련 예제***
+[Member.java]
+package ssol;
+
+public class Member {
+
+	private String name;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+}
+
+[use_c_set.jsp]
+<%@ page contentType="text/html; charset=euc-kr" %>
+<%@ page import="ssol.Member" %>       
+<%@ page import="java.util.HashMap" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %> 
+<%
+	Member member = new Member(); 
+	HashMap<String, String> pref = new HashMap<String, String>();
+%>  
+<html>
+<body>
+<%--
+set태그는 변수를 설정할때 사용한다. 그리고 기본객체의 영역에 속성설정까지한다.
+<c:set var="member" value="<%= member %>" scope="request"/>
+<c:set target="${member}" property="name" value="최범균" />
+
+Member member = new Member();
+member.setName("최범균");
+pageContext.setAttribute("member", member);
+
+${member.name}
+Member member=(Member)pageContext.getAttribute("member");
+member.getName();
+ --%>
+<c:set var="member" value="<%= member %>" scope="page" />
+<c:set target="${member}" property="name" value="최범균" />
+
+<c:set var="pref" value="<%= pref %>" />
+<c:set var="favoriateColor" value="#{pref.color}" />
+
+회원 이름: ${member.name},
+좋아하는 색: ${favoriateColor}
+
+<br />
+<c:set target="${pref}" property="color" value="red" />
+
+설정 이후 좋아하는 색: ${favoriateColor}
+
+</body>
+</html>
+
+[use_out_tag.jsp] use_out_tag.jsp?path=/jstl/use_out_tag.jsp
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ page import = "java.io.IOException, java.io.FileReader" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>소스 보기</title></head>
+<body>
+
+<%
+	FileReader reader = null;
+	try {
+		String path = request.getParameter("path");
+		reader = new FileReader(getServletContext().getRealPath(path));
+%>
+<pre>
+소스 코드 = <%= path %>
+<c:out value="<%= reader %>" escapeXml="true" />
+</pre>
+<%
+	} catch(IOException ex) {
+%>
+에러: <%= ex.getMessage() %>
+<% 
+	} finally {
+		if (reader != null)
+			try {
+				reader.close();
+			} catch(IOException ex) {}
+	}
+%>
+
+</body>
+</html>
+
+[use_foreach_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ page import="java.util.HashMap" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%
+	HashMap<String,Object> mapData = new HashMap<String,Object>();
+	mapData.put("name", "Soldesk");
+	mapData.put("today", new java.util.Date());
+%>
+<c:set var="intArray" value="<%= new int[] {1,2,3,4,5} %>" />
+<c:set var="map" value="<%= mapData %>" />
+<html>
+<head><title>forEach 태그</title></head>
+<body>
+<h4>1부터 100까지 홀수의 합</h4>
+<c:set var="sum" value="0" />
+<c:forEach var="i" begin="1" end="100" step="2">
+<c:set var="sum" value="${sum + i}" />
+</c:forEach>
+결과 = ${sum}
+
+<h4>구구단: 4단</h4>
+<ul>
+<c:forEach var="i" begin="1" end="9">
+	<li>4 * ${i} = ${4 * i}
+</c:forEach>
+</ul>
+
+<h4>int형 배열</h4>
+
+<c:forEach var="i" items="${intArray}" begin="2" end="4" varStatus="status">
+	${status.index}-${status.count}-[${i}] <br />
+</c:forEach>
+
+<h4>Map</h4>
+
+<c:forEach var="i" items="${map}">
+	${i.key} = ${i.value}<br>
+</c:forEach>
+
+</body>
+</html>
+
+[use_fortokens_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<html>
+<head><title>forTokens 태그</title></head>
+<body>
+
+콤마와 점을 구분자로 사용:<br>
+<c:forTokens var="token"
+             items="빨강색,주황색.노란색.초록색,파랑색,남색.보라색"
+             delims=",.">
+${token} 
+</c:forTokens>
+
+</body>
+</html>
+
+[use_catch_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>catch 태그</title></head>
+<body>
+
+<c:catch var="ex">
+name 파라미터의 값 = <%= request.getParameter("name") %><br>
+<%  if (request.getParameter("name").equals("test")) {  %>
+${param.name}은 test 입니다.
+<%  }   %>
+</c:catch>
+<p>
+<c:if test="${ex != null}">
+예외가 발생하였습니다:<br>
+${ex}
+</c:if>
+
+</body>
+</html>
+
+[use_if_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>if 태그</title></head>
+<body>
+<c:if test="true">
+무조건 수행<br>
+</c:if>
+
+<c:if test="${param.name == 'bk'}">
+name 파라미터의 값이 ${param.name} 입니다.<br>
+</c:if>
+
+<c:if test="${18 < param.age}">
+당신의 나이는 18세 이상입니다.
+</c:if>
+</body>
+</html>
+
+[use_choose_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>choose 태그</title></head>
+<body>
+
+<ul>
+<c:choose> 
+  <c:when test="${param.name == 'bk'}" > 
+    <li> 당신의 이름은 ${param.name} 입니다.
+  </c:when> 
+  <c:when test="${param.age >= 20}" > 
+    <li> 당신은 20세 이상입니다.
+  </c:when> 
+  <c:otherwise> 
+    <li> 당신은 'bk'가 아니고 20세 이상이 아닙니다.
+  </c:otherwise> 
+</c:choose> 
+</ul>
+
+</body>
+</html>
+
+[use_import_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>  
+<% request.setCharacterEncoding("utf-8"); %>
+<c:choose>
+	<c:when test="${param.type == 'flickr'}">
+	    <%--http://www.flickr.com/search?f=hp&q=보라매공원 --%>
+		<c:import url="https://www.flickr.com/search">
+			<c:param name="f" value="hp" />			
+			<c:param name="q" value="보라매공원" />
+		</c:import>
+	</c:when>
+	<c:when test="${param.type == 'youtube'}">
+		<c:import url="https://www.youtube.com/results">
+			<c:param name="search_query" value="ryu" />			
+		</c:import>
+	</c:when>
+	<c:otherwise>
+		<c:import url="use_import_tag_help.jsp">
+			<c:param name="message" value="선택해주세요" />
+		</c:import>
+	</c:otherwise>
+</c:choose>
+
+[use_import_tag_help.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>도움</title></head>
+<body>
+${param.message}:
+<ul>
+	<li>cafe - 다음 카페에서 검색</li>
+	<li>blog - 다음 블로그/티스토리 검색</li>
+</ul>
+</body>
+</html>
+
+[use_url_tag.jsp]
+<%@ page contentType="text/html; charset=euc-kr" session="false" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<body>
+<c:url value="http://search.daum.net/search" var="searchUrl">
+	<c:param name="w" value="blog" />
+	<c:param name="q" value="박지성" />
+</c:url>
+
+<ul>
+	<li>${searchUrl}</li>
+	<li><c:url value="/use_if_tag.jsp" /></li>
+	<li><c:url value="./use_if_tag.jsp" /></li>
+</ul>
+
+</body>
+</html>
+
+[use_redirect_tag.jsp]
+<%@ page contentType="text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>  
+<c:if test="${param.dest == '1'}">
+	<c:redirect url="/use_c_set.jsp" />
+</c:if>
+<c:if test="${param.dest == '2'}">
+	<c:redirect url="use_c_set.jsp" />
+</c:if>
+<c:if test="${param.dest == '3'}">
+	<c:redirect url="/el/viewToday.jsp" context="/SSOL" />
+</c:if>
+<c:if test="${param.dest == '4'}">
+	<c:redirect url="http://www.youtube.com/results">
+			<c:param name="search_query" value="ryu" />
+	</c:redirect>
+</c:if>
+
+	
+=================================================
+[use_message_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%-- <fmt:setLocale value="en" /> --%>
+<fmt:bundle basename="resource.message">
+<fmt:message key="TITLE" var="title"/>
+<html>
+<head><title>${title}</title></head>
+<body>
+
+<fmt:message key="GREETING" />
+<br>
+<c:if test="${! empty param.id}">
+<fmt:message key="VISITOR">
+	<fmt:param value="${param.id}" />
+</fmt:message>
+</c:if>
+
+</body>
+</html>
+</fmt:bundle>
+
+[use_message_tag2.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<fmt:setBundle var="message" basename="resource.message" />
+
+<fmt:message bundle="${message}" key="TITLE" var="title"/>
+<html>
+<head><title>${title}</title></head>
+<body>
+
+<fmt:message bundle="${message}" key="GREETING" />
+<br>
+<c:if test="${! empty param.id}">
+<fmt:message bundle="${message}" key="VISITOR">
+    <fmt:param value="${param.id}" />
+</fmt:message>
+</c:if>
+
+</body>
+</html>
+
+[/src/resource/message.properties]
+TITLE = MadVirus's Learning JSP 2.1
+GREETING = HI! I'm BK
+VISITOR = Your ID is {0}.
+
+[/src/resource/message_ko.properties]
+TITLE = \uc194\ub370\uc2a4\ud06c\uc758 JSP 2.1 \ubc30\uc6b0\uae30\uc785\ub2c8\ub2e4.
+GREETING = \uc548\ub155\ud558\uc138\uc694. \uc194\ub370\uc2a4\ud06c\uc785\ub2c8\ub2e4.
+VISITOR = \ub2f9\uc2e0\uc758 \uc544\uc774\ub514\ub294 {0}\uc785\ub2c8\ub2e4.
+
+
+
+[use_date_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>dateFormat태그 사용</title></head>
+<body>
+
+<c:set var="now" value="<%= new java.util.Date() %>" />
+<fmt:formatDate value="${now}" type="date" dateStyle="full" /> <br>
+<fmt:formatDate value="${now}" type="date" dateStyle="short" /> <br>
+<fmt:formatDate value="${now}" type="time" /> <br>
+<fmt:formatDate value="${now}" type="both" 
+                dateStyle="full" timeStyle="full" /> <br>
+<fmt:formatDate value="${now}" pattern="z a h:mm" /> <br>
+
+</body>
+</html>
+
+[listTimezones.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>시간대 목록</title></head>
+<body>
+
+<c:forEach var="id" items="<%= java.util.TimeZone.getAvailableIDs() %>">
+    ${id}<br/>
+</c:forEach>
+
+</body>
+</html>
+
+[use_timezone_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>timeZone 태그 사용</title></head>
+<body>
+
+<c:set var="now" value="<%= new java.util.Date() %>" />
+
+<fmt:formatDate value="${now}" type="both" 
+                dateStyle="full" timeStyle="full" />
+
+<br>
+<fmt:timeZone value="America/Argentina/Buenos_Aires">
+<fmt:formatDate value="${now}" type="both" 
+                dateStyle="full" timeStyle="full" />
+</fmt:timeZone>
+
+</body>
+</html>
+
+[use_number_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<html>
+<head><title>numberFormat 태그 사용</title></head>
+<body>
+
+<c:set var="price" value="10000" />
+<fmt:formatNumber value="${price}" type="number" var="numberType" />
+<br/>
+통화: <fmt:formatNumber value="${price}" 
+            type="currency" currencySymbol="원" />
+<br/>
+퍼센트: <fmt:formatNumber value="${price}" 
+            type="percent" groupingUsed="false" />
+<br/>
+숫자: ${numberType}
+<br/>
+패턴: <fmt:formatNumber value="${price}" pattern="00000000.00"/>
+</body>
+</html>
+
+[use_function_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<html>
+<head><title>함수 사용</title></head>
+<body>
+<c:set var="str1" value="Functions <태그>를 사용합니다. " />
+<c:set var="str2" value="사용" />
+<c:set var="tokens" value="1,2,3,4,5,6,7,8,9,10" />
+
+length(str1) = ${fn:length(str1)} <br>
+toUpperCase(str1) = "${fn:toUpperCase(str1)}" <br>
+toLowerCase(str1) = "${fn:toLowerCase(str1)}" <br>
+substring(str1, 3, 6) = "${fn:substring(str1, 3, 6)}" <br>
+substringAfter(str1, str2) = "${fn:substringAfter(str1, str2)}" <br>
+substringBefore(str1, str2) = "${fn:substringBefore(str1, str2)}" <br>
+trim(str1) = "${fn:trim(str1)}" <br>
+replace(str1, src, dest) = "${fn:replace(str1, " ", "-")}" <br>
+indexOf(str1, str2) = "${fn:indexOf(str1, str2)}" <br>
+startsWith(str1, str2) = "${fn:startsWith(str1, 'Fun')}" <br>
+endsWith(str1, str2) = "${fn:endsWith(str1, "합니다.")}" <br>
+contains(str1, str2) = "${fn:contains(str1, str2)}" <br>
+containsIgnoreCase(str1, str2) = "${fn:containsIgnoreCase(str1, str2)}" <br>
+
+<c:set var="array" value="${fn:split(tokens, ',')}" />
+
+join(array, "-") = "${fn:join(array, "-")}" <br>
+escapeXml(str1) = "${fn:escapeXml(str1)}" <br>
+
+</body>
+</html>
+
+[use_sql_tag.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql" %>
+
+<html>
+<head><title>JSTL sql 예제 - query</title></head>
+<body>
+
+
+<sql:query var="rs"  dataSource="jdbc:apache:commons:dbcp:/pool">
+    select * from member 
+</sql:query>
+
+<table border="1">
+  <tr><%--필드명  출력--%>
+    <c:forEach var="columnName" items="${rs.columnNames}">
+      <th><c:out value="${columnName}"/></th>
+    </c:forEach>
+  </tr>
+  <c:forEach var="row" items="${rs.rowsByIndex}"><%-- 레코드의 수 만큼 반복한다. --%>
+  <tr>
+    <c:forEach var="column" items="${row}" varStatus="i"><%-- 레코드의 필드수 만큼 반복한다. --%>
+   <td>
+       <c:if test="${column!=null}"> <%--해당 필드값이 null이 아니면--%>
+		    <c:out value="${column}"/>
+	   </c:if> <%--해당 필드값이 null이면--%>
+	   <c:if test="${column==null}">
+		    &nbsp;
+	   </c:if>
+    </td>
+    </c:forEach>
+  </tr>
+   </c:forEach>
+</table>
+
+</body>
+</html>
+
+[use_sql_tag2.jsp]
+<%@ page contentType = "text/html; charset=euc-kr" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="sql" uri="http://java.sun.com/jsp/jstl/sql" %>
+
+<html>
+<head><title>JSTL sql 예제 - update, param</title></head>
+<body>
+
+<sql:update dataSource="jdbc:apache:commons:dbcp:/pool">
+    update member set password=? where memberid= ?
+	<sql:param value="${3456}"/>
+	<sql:param value="${'SS'}"/> 	
+</sql:update>
+
+<sql:query var="rs"  dataSource="jdbc:apache:commons:dbcp:/pool">
+    select * from member 
+</sql:query>
+
+<table border="1">
+  <tr><%--필드명  출력--%>
+    <c:forEach var="columnName" items="${rs.columnNames}">
+      <th><c:out value="${columnName}"/></th>
+    </c:forEach>
+  </tr>
+  <c:forEach var="row" items="${rs.rowsByIndex}"><%-- 레코드의 수 만큼 반복한다. --%>
+  <tr>
+    <c:forEach var="column" items="${row}" varStatus="i"><%-- 레코드의 필드수 만큼 반복한다. --%>
+   <td>
+       <c:if test="${column!=null}"> <%--해당 필드값이 null이 아니면--%>
+		    <c:out value="${column}"/>
+	   </c:if> <%--해당 필드값이 null이면--%>
+	   <c:if test="${column==null}">
+		    &nbsp;
+	   </c:if>
+    </td>
+    </c:forEach>
+  </tr>
+   </c:forEach>
+</table>
+
+</body>
+</html>
